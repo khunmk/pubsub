@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WS Server</title>
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div id="app">
+
+        <ul id="message-list"></ul>
+
+        <form action="#" method="post" id="send-msg">
+            <input type="text" name="msg" value="" id="msg-input">
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://127.0.0.1:3000/ws")
+        window.ws = ws;
+
+        ws.onopen = () => {
+            console.log("connected");
+            ws.send('{ "action":"subscribe", "topic":"room1" }')
+        }
+
+        ws.onmessage = (msg) => {
+            const msgList = document.getElementById("message-list");
+
+            const msgItem = document.createElement('li')
+            msgItem.setAttribute("class", "message-item")
+            msgItem.innerHTML = msg.data;
+
+            msgList.append(msgItem)
+            console.log(msg);
+        }
+
+        ws.onclose = () => {
+            console.log("disconnected!");
+        }
+
+        const form = document.getElementById('send-msg')
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const ele = document.getElementById('msg-input');
+            ws.send(`{ "action":"publish", "topic":"room1", "message":"${ele.value}" }`)
+            ele.value = "";
+        }
+    </script>
+</body>
+</html>
